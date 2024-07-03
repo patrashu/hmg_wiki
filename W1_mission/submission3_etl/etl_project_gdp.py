@@ -40,8 +40,37 @@ class Logger:
             print(line)
     
 
+def make_region_df(
+    raw_txt_path: str | os.PathLike,
+    region_df_path: str | os.PathLike
+) -> None:
+    """Make Region DataFrame
+    
+    Args:
+        raw_txt_path (str | os.PathLike): Raw Text filepath
+        region_df_path (str | os.PathLike): Region DataFrame filepath
+    Returns:
+        None
+    """
+    with open(raw_txt_path, 'r') as f:
+        lines = f.readlines()
+    
+    data = {
+        'Country': [],
+        'Region': []
+    }
+    for line in lines:
+        country, region = line.strip().split(',')
+        data["Country"].append(country)
+        data["Region"].append(region)
+
+    df = pd.DataFrame(data=data)
+    df.to_csv(region_df_path, index=False)
+    
+
 def extract(
     url: str,
+    region_df_path: str | os.PathLike,
     json_path: str | os.PathLike,
     logger: Logger
 ) -> bool:
@@ -49,6 +78,7 @@ def extract(
     
     Args:
         url (str): Wikipedia URL
+        region_df_path (str, os.PathLike): Region DataFrame filepath
         json_path (str, os.PathLike): JSON filepath to save
         logger (Logger): Logger
     Returns:
@@ -56,6 +86,8 @@ def extract(
     """
     success_flag = True
     logger.logging(f"Extracting data from {url}", "INFO")
+    
+    region_df = pd.read_csv(region_df_path)
     try:
         html = requests.get(url)
         soup = bs(html.content, 'html.parser')
@@ -71,7 +103,8 @@ def extract(
             # Extract each column
             cols = row.find_all(['th', 'td'])
             cols = [col.text.strip() for col in cols]
-            data[cols[0]] = cols[1:]
+            region = region_df[region_df['Country'] == cols[0]]['Region'].values[0] if cols[0] in region_df['Country'].values else None                                             
+            data[cols[0]] = cols[1:] + [region]
         logger.logging(f"Finished extracting data from {url}", "INFO")
 
         with open(json_path, 'w') as f:
@@ -79,7 +112,7 @@ def extract(
         logger.logging(f"Data is saved as {json_path}", "INFO")
 
     except Exception as e:
-        logger.logging("Failed to extract data from Wikipedia" + e, "ERROR")
+        logger.logging("Failed to extract data from Wikipedia", "ERROR")
         print(e)
         success_flag = False
 
@@ -109,8 +142,7 @@ def transform(
         # Preprocessing
         new_data = []
         for country, values in data.items():
-            gdp = values[0]
-            year = values[1]
+            gdp, year, region = values[0], values[1], values[-1]
             if gdp == '—':
                 gdp, year = None, None
             else:
@@ -118,14 +150,15 @@ def transform(
                 gdp = round(gdp*0.001, 2) # million to billion
                 if len(year) > 4:
                     year = int(year[-4:])
-            new_data.append([country, gdp, year])
+            new_data.append([country, gdp, year, region])
 
         df = pd.DataFrame(
             new_data,
             columns=[
                 "Country/Territory",
                 "GDP(US$MM)",
-                "Year"
+                "Year",
+                "Region"
             ],
         )
         df.to_csv(df_path, index=False)
@@ -154,16 +187,26 @@ def load(
     
     logger.logging("Loading data", "INFO")
     df = pd.read_csv(df_path)
+    
+    # mission 1
     upper_100b = df[df['GDP(US$MM)'] > 100]
+    print("Countries with GDP over 100 billion USD:")
     print(upper_100b)
     
-    
-    
+    # mission 2
+    group_df = df.groupby('Region', group_keys=False).apply(
+            lambda x: x.nlargest(5, 'GDP(US$MM)')['GDP(US$MM)'].mean(),
+            include_groups=False
+        )
+    print("\nAverage GDP of top 5 countries in each region:")
+    print(group_df)
     logger.logging("Finished loading data", "INFO")
 
 
 if __name__ == '__main__':
     LOGGER_PATH = "etl_project_log.txt"
+    RAW_TXT_PATH = "region.txt"
+    REGION_DF_PATH = "region.csv"
     WIKI_URL = "https://en.wikipedia.org/wiki/List_of_countries_by_GDP_%28nominal%29"
     JSON_PATH = "Countries_by_GDP.json"
     DF_PATH = "Countries_by_GDP.csv"
@@ -171,7 +214,8 @@ if __name__ == '__main__':
     logger = Logger(LOGGER_PATH)
     logger.logging("ETL Process is Started", "INFO")
     
-    ext_flag = extract(WIKI_URL, JSON_PATH, logger)
+    make_region_df(RAW_TXT_PATH, REGION_DF_PATH)
+    ext_flag = extract(WIKI_URL, REGION_DF_PATH, JSON_PATH, logger)
     if not ext_flag:
         sys.exit(0)
 

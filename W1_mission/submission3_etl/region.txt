@@ -1,0 +1,109 @@
+United States,North America
+China,Asia
+Japan,Asia
+Germany,Europe
+India,Asia
+United Kingdom,Europe
+France,Europe
+Brazil,South America
+Italy,Europe
+Canada,North America
+Russia,Europe
+South Korea,Asia
+Australia,Oceania
+Spain,Europe
+Mexico,North America
+Indonesia,Asia
+Netherlands,Europe
+Saudi Arabia,Middle East
+Turkey,Middle East
+Switzerland,Europe
+Argentina,South America
+Sweden,Europe
+Poland,Europe
+Belgium,Europe
+Thailand,Asia
+Iran,Middle East
+Austria,Europe
+Norway,Europe
+United Arab Emirates,Middle East
+Nigeria,Africa
+Israel,Middle East
+South Africa,Africa
+Hong Kong,Asia
+Ireland,Europe
+Denmark,Europe
+Malaysia,Asia
+Singapore,Asia
+Philippines,Asia
+Egypt,Africa
+Pakistan,Asia
+Chile,South America
+Finland,Europe
+Vietnam,Asia
+Czech Republic,Europe
+Romania,Europe
+Portugal,Europe
+Bangladesh,Asia
+New Zealand,Oceania
+Hungary,Europe
+Greece,Europe
+Qatar,Middle East
+Kazakhstan,Asia
+Kuwait,Middle East
+Peru,South America
+Iraq,Middle East
+Algeria,Africa
+Ukraine,Europe
+Morocco,Africa
+Ecuador,South America
+Slovakia,Europe
+Sri Lanka,Asia
+Ethiopia,Africa
+Kenya,Africa
+Myanmar,Asia
+Venezuela,South America
+Uzbekistan,Asia
+Sudan,Africa
+Angola,Africa
+Dominican Republic,North America
+Guatemala,North America
+Luxembourg,Europe
+Bulgaria,Europe
+Costa Rica,North America
+Croatia,Europe
+Belarus,Europe
+Uruguay,South America
+Lebanon,Middle East
+Oman,Middle East
+Lithuania,Europe
+Panama,North America
+Slovenia,Europe
+Serbia,Europe
+Estonia,Europe
+Iceland,Europe
+Bahrain,Middle East
+Trinidad and Tobago,North America
+Cyprus,Europe
+Latvia,Europe
+Paraguay,South America
+El Salvador,North America
+Bosnia and Herzegovina,Europe
+Bolivia,South America
+Mali,Africa
+Tanzania,Africa
+Yemen,Middle East
+North Macedonia,Europe
+Mongolia,Asia
+Albania,Europe
+Armenia,Europe
+Namibia,Africa
+Jamaica,North America
+Madagascar,Africa
+Malta,Europe
+Mozambique,Africa
+Zambia,Africa
+Botswana,Africa
+Gabon,Africa
+Lesotho,Africa
+Gambia,Africa
