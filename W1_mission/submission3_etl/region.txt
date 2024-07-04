@@ -27,7 +27,8 @@ Brunei,Asia
 Bulgaria,Europe
 Burkina Faso,Africa
 Burundi,Africa
-Cape Verde,Africa
+Cape Vßerde,Africa
+Cabo Verde,Africa
 Cambodia,Asia
 Cameroon,Africa
 Canada,North America
