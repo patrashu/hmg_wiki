@@ -20,7 +20,7 @@ class Logger:
         """
         self.log_file = log_file
 
-    def logging(
+    def log(
         self, 
         msg: str, 
         level: str = "INFO"
@@ -85,7 +85,7 @@ def extract(
         success_flag (bool): Success Flag
     """
     success_flag = True
-    logger.logging(f"Extracting data from {url}", "INFO")
+    logger.log(f"Extracting data from {url}", "INFO")
     
     region_df = pd.read_csv(region_df_path)
     try:
@@ -105,26 +105,26 @@ def extract(
             cols = [col.text.strip() for col in cols]
             region = region_df[region_df['Country'] == cols[0]]['Region'].values[0] if cols[0] in region_df['Country'].values else None                                             
             data[cols[0]] = cols[1:] + [region]
-        logger.logging(f"Finished extracting data from {url}", "INFO")
+        logger.log(f"Finished extracting data from {url}", "INFO")
 
         with open(json_path, 'w') as f:
             json.dump(data, f)
-        logger.logging(f"Data is saved as {json_path}", "INFO")
+        logger.log(f"Data is saved as {json_path}", "INFO")
 
     except Exception as e:
-        logger.logging("Failed to extract data from Wikipedia", "ERROR")
+        logger.log("Failed to extract data from Wikipedia", "ERROR")
         print(e)
         success_flag = False
 
     return success_flag
 
 
-def transform(
+def transform_to_dataframe(
     json_path: str | os.PathLike,
     df_path: str | os.PathLike,
     logger: Logger,
 ) -> bool:
-    """Transform Data
+    """Transform Data to pandas dataframe
     
     Args:
         json_path (str | os.PathLike): JSON filepath
@@ -134,7 +134,7 @@ def transform(
         success_flag (bool): Success Flag
     """
     success_flag = True
-    logger.logging("Transforming data", "INFO")
+    logger.log("Transforming JSON to Pandas Dataframe", "INFO")
     try:
         with open(json_path, 'r') as f:
             data = json.load(f)
@@ -144,14 +144,15 @@ def transform(
         for country, values in data.items():
             gdp, year, region = values[0], values[1], values[-1]
             if gdp == '—':
-                gdp, year = None, None
-            else:
-                gdp = float(gdp.replace(',', ''))
-                gdp = round(gdp*0.001, 2) # million to billion
-                if len(year) > 4:
-                    year = int(year[-4:])
+                continue
+            gdp = float(gdp.replace(',', ''))
+            gdp = round(gdp*0.001, 2) # million to billion
+            if len(year) > 4:
+                year = year[-4:]
             new_data.append([country, gdp, year, region])
 
+        # Sort Valuesß
+        new_data = sorted(new_data, key=lambda x: -x[1])
         df = pd.DataFrame(
             new_data,
             columns=[
@@ -162,46 +163,56 @@ def transform(
             ],
         )
         df.to_csv(df_path, index=False)
-        logger.logging(f"DataFrame is saved as {df_path}", "INFO")
+        logger.log(f"DataFrame is saved as {df_path}", "INFO")
 
     except Exception as e:
-        logger.logging("Failed to transform data", "ERROR")
+        logger.log("Failed to transform data", "ERROR")
         print(e)
         success_flag = False
-        
+                                                
     return success_flag   
 
 
 def load(
     df_path: str | os.PathLike,
     logger: Logger,
-)-> None:
+) -> bool:
     """Load Dataframe and print results
     
     Args:
         df_path (str | os.PathLike): DataFrame filepath
         logger (Logger): Logger
     Returns:
-        None
+        success_flag (bool): Success Flag
     """
     
-    logger.logging("Loading data", "INFO")
-    df = pd.read_csv(df_path)
+    logger.log("Loading data from Pandas Dataframe", "INFO")
+    success_flag = True
+    try:
+        df = pd.read_csv(df_path)
     
-    # mission 1
-    upper_100b = df[df['GDP(US$MM)'] > 100]
-    print("Countries with GDP over 100 billion USD:")
-    print(upper_100b)
+        # mission 1
+        upper_100b = df[df['GDP(US$MM)'] > 100]
+        print("Countries with GDP over 100 billion USD:")
+        print(upper_100b)
+        
+        # mission 2
+        group_df = df.groupby('Region', group_keys=False).apply(
+                lambda x: x.nlargest(5, 'GDP(US$MM)')['GDP(US$MM)'].mean(),
+                include_groups=False
+            )
+        print("\nAverage GDP of top 5 countries in each region:")
+        print(group_df)
+        logger.log("Finished loading data", "INFO")
+        logger.log('Done!!', 'INFO')
+        
+    except Exception as e:
+        logger.log("Failed to load data", "ERROR")
+        print(e)
+        success_flag = False
     
-    # mission 2
-    group_df = df.groupby('Region', group_keys=False).apply(
-            lambda x: x.nlargest(5, 'GDP(US$MM)')['GDP(US$MM)'].mean(),
-            include_groups=False
-        )
-    print("\nAverage GDP of top 5 countries in each region:")
-    print(group_df)
-    logger.logging("Finished loading data", "INFO")
-
+    return success_flag
+    
 
 if __name__ == '__main__':
     LOGGER_PATH = "etl_project_log.txt"
@@ -212,16 +223,19 @@ if __name__ == '__main__':
     DF_PATH = "Countries_by_GDP.csv"
 
     logger = Logger(LOGGER_PATH)
-    logger.logging("ETL Process is Started", "INFO")
+    logger.log("ETL Process is Started", "INFO")
     
     make_region_df(RAW_TXT_PATH, REGION_DF_PATH)
     ext_flag = extract(WIKI_URL, REGION_DF_PATH, JSON_PATH, logger)
     if not ext_flag:
         sys.exit(0)
 
-    trf_flag = transform(JSON_PATH, DF_PATH, logger)
+    trf_flag = transform_to_dataframe(JSON_PATH, DF_PATH, logger)
     if not trf_flag:
         sys.exit(0)
 
-    load(DF_PATH, logger)
-    logger.logging("ETL Process is Finished", "INFO")
+    load_flag = load(DF_PATH, logger)
+    if not load_flag:
+        sys.exit(0)
+        
+    logger.log("ETL Process is Finished", "INFO")
