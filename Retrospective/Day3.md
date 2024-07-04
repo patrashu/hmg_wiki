@@ -1,6 +1,6 @@
 ## Day3 회고
 
-- [Notion Link]("https://patrashu.notion.site/Day-3-68551e28d33548db82bc52a1428ad794?pvs=4")
+- [Notion Link](https://patrashu.notion.site/Day-3-68551e28d33548db82bc52a1428ad794?pvs=4)
 
 ### 팀 리뷰 진행
 
