@@ -8,6 +8,12 @@ import pandas as pd
 from bs4 import BeautifulSoup as bs
 
 
+LOGGER_PATH = "etl_project_log.txt"
+WIKI_URL = "https://en.wikipedia.org/wiki/List_of_countries_by_GDP_%28nominal%29"
+REGION_DF_PATH = "region.csv"
+JSON_PATH = "Countries_by_GDP.json"
+    
+
 class Logger:
     """Logger Class"""
     def __init__(self, log_file: str | os.PathLike) -> None:
@@ -44,7 +50,7 @@ def extract(
     url: str,
     logger: Logger
 ) -> dict:
-    """Extract Table Data from Wikipedia and Save as JSON
+    """Extract Table Data from Wikipedia
     
     Args:
         url (str): Wikipedia URL
@@ -87,10 +93,10 @@ def transform(
     region_df_path: pd.DataFrame,
     logger: Logger,
 ) -> pd.DataFrame:
-    """Transform Data to pandas dataframe
+    """Transform Data
     
     Args:
-        df (pd.DataFrame): JSON filepath
+        json_data (dict): JSON filepath
         region_df_path (pd.DataFrame): Region DataFrame filepath
         logger (Logger): Logger
     Returns:
@@ -120,14 +126,14 @@ def transform(
 
 def load(
     df: pd.DataFrame,
-    df_path: str | os.PathLike,
+    json_path: str | os.PathLike,
     logger: Logger,
 ) -> None:
-    """Load Dataframe and print results
+    """Save Transformed Data to JSON
     
     Args:
         df (pd.DataFrame): DataFrame
-        df_path (str | os.PathLike): DataFrame filepath
+        json_path (str | os.PathLike): DataFrame filepath
         logger (Logger): Logger
     Returns:
         None
@@ -135,7 +141,7 @@ def load(
     
     try:
         logger.log("Loading start !!", "INFO")
-        df.to_json(df_path, orient='records')
+        df.to_json(json_path, orient='records')
         logger.log("Loading Finished !!", "INFO")
     
     except Exception as e:
@@ -149,7 +155,7 @@ def query_gdp_over_usd_100b(
     logger: Logger,    
 ) -> None:
     """Query GDP over USD 100B"""
-    logger.log("Querying GDP over USD 100B", "INFO")
+    logger.log("Query GDP over USD 100B", "INFO")
     try:
         df = pd.read_json(json_path)
         conn = sqlite3.connect(':memory:')
@@ -217,11 +223,6 @@ def query_top5_mean_per_region(
         
 
 if __name__ == '__main__':
-    LOGGER_PATH = "etl_project_log.txt"
-    WIKI_URL = "https://en.wikipedia.org/wiki/List_of_countries_by_GDP_%28nominal%29"
-    REGION_DF_PATH = "region.csv"
-    JSON_PATH = "Countries_by_GDP.json"
-
     logger = Logger(LOGGER_PATH)
     logger.log("ETL Process is Started", "INFO")
 

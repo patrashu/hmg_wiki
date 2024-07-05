@@ -9,6 +9,12 @@ import pandas as pd
 from bs4 import BeautifulSoup as bs
 
 
+LOGGER_PATH = "etl_project_log.txt"
+WIKI_URL = "https://en.wikipedia.org/wiki/List_of_countries_by_GDP_%28nominal%29"
+REGION_DF_PATH = "region.csv"
+DB_PATH = "Countries_by_GDP.db"
+    
+    
 class Logger:
     """Logger Class"""
     def __init__(self, log_file: str | os.PathLike) -> None:
@@ -41,232 +47,190 @@ class Logger:
             print(line)
     
 
-def make_region_df(
-    raw_txt_path: str | os.PathLike,
-    region_df_path: str | os.PathLike
-) -> None:
-    """Make Region DataFrame
-    
-    Args:
-        raw_txt_path (str | os.PathLike): Raw Text filepath
-        region_df_path (str | os.PathLike): Region DataFrame filepath
-    Returns:
-        None
-    """
-    with open(raw_txt_path, 'r') as f:
-        lines = f.readlines()
-    
-    data = {
-        'Country': [],
-        'Region': []
-    }
-    for line in lines:
-        country, region = line.strip().split(',')
-        data["Country"].append(country)
-        data["Region"].append(region)
-
-    df = pd.DataFrame(data=data)
-    df.to_csv(region_df_path, index=False)
-    
-
 def extract(
     url: str,
-    region_df_path: str | os.PathLike,
-    json_path: str | os.PathLike,
     logger: Logger
-) -> bool:
-    """Extract Table Data from Wikipedia and Save as JSON
+) -> dict:
+    """Extract Table Data from Wikipedia
     
     Args:
         url (str): Wikipedia URL
-        region_df_path (str, os.PathLike): Region DataFrame filepath
-        json_path (str, os.PathLike): JSON filepath to save
         logger (Logger): Logger
     Returns:
-        success_flag (bool): Success Flag
+        data (dict): Extracted Data
     """
-    success_flag = True
-    logger.log(f"Extracting data from {url}", "INFO")
-    
-    region_df = pd.read_csv(region_df_path)
+    logger.log(f"Extracting Start !!", "INFO")
     try:
         html = requests.get(url)
         soup = bs(html.content, 'html.parser')
         table = soup.find('table', {'class': 'wikitable'})
-
+        data = {
+            'Country/Territory': [],
+            'GDP(US$MM)': [],
+        }
+        
         # Country/Territory: [other data]
-        data = {}
         for i, row in enumerate(table.find_all('tr')):
             # Remove Title
             if i < 3:
                 continue
 
             # Extract each column
-            cols = row.find_all(['th', 'td'])
-            cols = [col.text.strip() for col in cols]
-            region = region_df[region_df['Country'] == cols[0]]['Region'].values[0] if cols[0] in region_df['Country'].values else 'N/A'                                     
-            data[cols[0]] = cols[1:] + [region]
-        logger.log(f"Finished extracting data from {url}", "INFO")
-
-        with open(json_path, 'w') as f:
-            json.dump(data, f)
-        logger.log(f"Data is saved as {json_path}", "INFO")
+            cols = [col.text.strip() for col in row.find_all(['th', 'td'])]
+            data['Country/Territory'].append(cols[0])
+            data['GDP(US$MM)'].append(cols[1])                            
+        
+        logger.log(f"Extracting Finished !!", "INFO")
+        return data
 
     except Exception as e:
-        logger.log("Failed to extract data from Wikipedia", "ERROR")
+        logger.log("Extracting Failed", "ERROR")
         print(e)
-        success_flag = False
-
-    return success_flag
+        sys.exit(0)
 
 
-def transform_to_dbtable(
-    json_path: str | os.PathLike,
-    db_path: str | os.PathLike,
+def transform(
+    json_data: dict,
+    region_df_path: pd.DataFrame,
     logger: Logger,
-) -> bool:
-    """Transform Data to database table
+) -> pd.DataFrame:
+    """Transform Data
     
     Args:
-        json_path (str | os.PathLike): JSON filepath
-        db_path (str | os.PathLike): Database filepath
+        json_path (json_data): JSON filepath
+        region_df_path (pd.DataFrame): Region DataFrame filepath
         logger (Logger): Logger
     Returns:
-        success_flag (bool): Success Flag
+        df (pd.DataFrame): DataFrame
     """
-    success_flag = True
-    logger.log("Transforming JSON to DB Table", "INFO")
+    
+    logger.log("Transforming Start !!")
     try:
-        with open(json_path, 'r') as f:
-            data = json.load(f)
+        df = pd.DataFrame(json_data)
+        region_df = pd.read_csv(region_df_path)
         
-        # check db file exists
-        if os.path.exists(db_path):
-            return success_flag
-
-        # Create Database
-        conn = sqlite3.connect(db_path)
-        conn.execute("""
-            CREATE TABLE WorldEconomies (
-                Country TEXT PRIMARY KEY,
-                GDP FLOAT,
-                Year TEXT,
-                Region TEXT
-            )            
-        """)
-        conn.commit()
+        df['GDP_USD_B'] = df['GDP(US$MM)'].apply(lambda x: x.replace(',', '') if x != '—' else '0')
+        df['GDP_USD_B'] = df['GDP_USD_B'].astype(float) / 1000
+        df['GDP_USD_B'] = df['GDP_USD_B'].round(2)
         
-        # INSERT data into Database(world_economies)
-        for country, values in data.items():
-            gdp, year, region = values[0], values[1], values[-1]
-            if gdp == '—':
-                continue
-            gdp = float(gdp.replace(',', ''))
-            gdp = round(gdp*0.001, 2) # million to billion
-            if len(year) > 4:
-                year = year[-4:]
-            conn.execute(
-                "INSERT INTO WorldEconomies VALUES (?, ?, ?, ?)",
-                (country, gdp, year, region)
-            )
-        conn.commit()
-        logger.log(f"DB Table is saved as {db_path}", "INFO")
+        df = pd.merge(df, region_df, on='Country/Territory', how='left')
+        df.rename(columns={'Country/Territory': 'Country'}, inplace=True)
+        logger.log("Transforming Finished !!")
+        
+        return df
 
     except Exception as e:
-        logger.log("Failed to transform data", "ERROR")
+        logger.log("Transforming Failed", "ERROR")
         print(e)
-        success_flag = False
-        os.remove(db_path)
+        sys.exit(0)
         
-    return success_flag   
-
-
+        
 def load(
+    df: pd.DataFrame,
     db_path: str | os.PathLike,
     logger: Logger,
-) -> bool:
-    """Load Database and print results
+) -> None:
+    """Save Transformed Data to DB Table
     
     Args:
+        df (pd.DataFrame): DataFrame
         db_path (str | os.PathLike): Database filepath
         logger (Logger): Logger
     Returns:
-        success_flag (bool): Success Flag
+        None
     """
+    logger.log("Loading Start !!")
+    if os.path.exists(db_path):
+        os.remove(db_path)
+
+    # Create Database
+    conn = sqlite3.connect(db_path)
+    conn.execute("""
+        CREATE TABLE WorldEconomies (
+            Country TEXT PRIMARY KEY,
+            GDP FLOAT,
+            Region TEXT
+        )            
+    """)    
+    conn.commit()
     
-    logger.log("Loading Data from DB Table", "INFO")
-    success_flag = True
-    try:
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        
-        # Print Countries with GDP over 100 billion USD
-        cursor.execute("""
-            SELECT * 
+    # INSERT data into Database(world_economies)
+    for _, row in df.iterrows():
+        conn.execute(
+            "INSERT INTO WorldEconomies VALUES (?, ?, ?)",
+            (row['Country'], row['GDP_USD_B'], row['Region'])
+        )
+    conn.commit()
+    conn.close()
+    logger.log("Logging Finished !!")
+
+
+def query_gdp_over_usd_100b(
+    db_path: str | os.PathLike,
+    logger: Logger,    
+) -> None:
+    """Query GDP over USD 100B"""
+    logger.log("Query GDP over USD 100B", "INFO")
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * 
+        FROM WorldEconomies
+        WHERE GDP >= 100
+        ORDER BY GDP DESC;
+    """)
+    
+    print("Countries with GDP over 100 billion USD with SQL:")
+    for row in cursor.fetchall():
+        print(row)
+    
+    logger.log("Querying Finished !!", "INFO")
+    conn.close()
+    
+
+def query_top5_mean_per_region(
+    db_path: str | os.PathLike,
+    logger: Logger,    
+) -> None:
+    """Query top5 mean value of GDP per region"""
+    logger.log("Querying top5 mean value of GDP per region", "INFO")
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("""
+        WITH Top5 AS (
+            SELECT 
+                Country, 
+                GDP, 
+                Region,
+                ROW_NUMBER() OVER(PARTITION BY Region ORDER BY GDP DESC) AS rnk
             FROM WorldEconomies
-            WHERE GDP >= 100
-            ORDER BY GDP DESC;
-        """)
+            WHERE GDP IS NOT NULL
+        )
+        SELECT Region, AVG(GDP) AS Top5_AVG_GDP 
+        FROM Top5
+        WHERE rnk <= 5
+        GROUP BY Region
+        ORDER BY Top5_AVG_GDP DESC;
+    """)
+    
+    print("\nAverage GDP of top 5 countries in each region:")
+    for row in cursor.fetchall():
+        print(row)
         
-        print("Countries with GDP over 100 billion USD with SQL:")
-        for row in cursor.fetchall():
-            print(row)
-        
-        # Print Average GDP of top 5 countries in each region
-        cursor.execute("""
-            WITH Top5 AS (
-                SELECT 
-                    Country, 
-                    GDP, 
-                    Region,
-                    ROW_NUMBER() OVER(PARTITION BY Region ORDER BY GDP DESC) AS rnk
-                FROM WorldEconomies
-                WHERE GDP IS NOT NULL
-            )
-            SELECT Region, AVG(GDP) AS Top5_AVG_GDP 
-            FROM Top5
-            WHERE rnk <= 5
-            GROUP BY Region
-            ORDER BY Top5_AVG_GDP DESC;
-        """)
-        
-        print("\nAverage GDP of top 5 countries in each region:")
-        for row in cursor.fetchall():
-            print(row)
-        conn.close()
-        
-        logger.log("All Queries are Finished", "INFO")
-        logger.log('Done!!', 'INFO')
-
-    except Exception as e:
-        logger.log("Failed to Query from DB Table", "ERROR")
-        print(e)
-        success_flag = False
-
-    return success_flag
-        
+    logger.log("Querying Finished !!", "INFO")
+    conn.close()
+ 
 
 if __name__ == '__main__':
-    LOGGER_PATH = "etl_project_log.txt"
-    RAW_TXT_PATH = "region.txt"
-    REGION_DF_PATH = "region.csv"
-    WIKI_URL = "https://en.wikipedia.org/wiki/List_of_countries_by_GDP_%28nominal%29"
-    JSON_PATH = "Countries_by_GDP.json"
-    DB_PATH = "Countries_by_GDP.db"
-
     logger = Logger(LOGGER_PATH)
     logger.log("ETL Process is Started", "INFO")
-    
-    make_region_df(RAW_TXT_PATH, REGION_DF_PATH)
-    ext_flag = extract(WIKI_URL, REGION_DF_PATH, JSON_PATH, logger)
-    if not ext_flag:
-        sys.exit(0)
 
-    trf_flag = transform_to_dbtable(JSON_PATH, DB_PATH, logger)
-    if not trf_flag:
-        sys.exit(0)
-
-    load_flag = load(DB_PATH, logger)
-    if not load_flag:
-        sys.exit(0)
+    extract_data = extract(WIKI_URL, logger)
+    transform_data = transform(extract_data, REGION_DF_PATH, logger)
+    load(transform_data, DB_PATH, logger)
+    query_gdp_over_usd_100b(DB_PATH, logger)
+    query_top5_mean_per_region(DB_PATH, logger)
+        
     logger.log("ETL Process is Finished", "INFO")
