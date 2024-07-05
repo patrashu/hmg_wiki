@@ -1,6 +1,6 @@
 import os
 import sys
-import json
+import sqlite3
 from datetime import datetime
 
 import requests
@@ -35,207 +35,200 @@ class Logger:
         """
         timestamp = datetime.now().strftime('%Y-%B-%d %H:%M:%S')
         with open(self.log_file, 'a') as f:
-            line = f"{timestamp} - {level} - {msg}\n"
+            line = f"{timestamp} - ({level}) - {msg}\n"
             f.write(line)
             print(line)
     
 
-def make_region_df(
-    raw_txt_path: str | os.PathLike,
-    region_df_path: str | os.PathLike
-) -> None:
-    """Make Region DataFrame
-    
-    Args:
-        raw_txt_path (str | os.PathLike): Raw Text filepath
-        region_df_path (str | os.PathLike): Region DataFrame filepath
-    Returns:
-        None
-    """
-    with open(raw_txt_path, 'r') as f:
-        lines = f.readlines()
-    
-    data = {
-        'Country': [],
-        'Region': []
-    }
-    for line in lines:
-        country, region = line.strip().split(',')
-        data["Country"].append(country)
-        data["Region"].append(region)
-
-    df = pd.DataFrame(data=data)
-    df.to_csv(region_df_path, index=False)
-    
-
 def extract(
     url: str,
-    region_df_path: str | os.PathLike,
-    json_path: str | os.PathLike,
     logger: Logger
-) -> bool:
+) -> dict:
     """Extract Table Data from Wikipedia and Save as JSON
     
     Args:
         url (str): Wikipedia URL
-        region_df_path (str, os.PathLike): Region DataFrame filepath
-        json_path (str, os.PathLike): JSON filepath to save
         logger (Logger): Logger
     Returns:
-        success_flag (bool): Success Flag
+        data (dict): Extracted Data
     """
-    success_flag = True
-    logger.log(f"Extracting data from {url}", "INFO")
-    
-    region_df = pd.read_csv(region_df_path)
+    logger.log(f"Extracting Start !!", "INFO")
     try:
         html = requests.get(url)
         soup = bs(html.content, 'html.parser')
         table = soup.find('table', {'class': 'wikitable'})
-
+        data = {
+            'Country/Territory': [],
+            'GDP(US$MM)': [],
+        }
+        
         # Country/Territory: [other data]
-        data = {}
         for i, row in enumerate(table.find_all('tr')):
             # Remove Title
             if i < 3:
                 continue
 
             # Extract each column
-            cols = row.find_all(['th', 'td'])
-            cols = [col.text.strip() for col in cols]
-            region = region_df[region_df['Country'] == cols[0]]['Region'].values[0] if cols[0] in region_df['Country'].values else None                                             
-            data[cols[0]] = cols[1:] + [region]
-        logger.log(f"Finished extracting data from {url}", "INFO")
-
-        with open(json_path, 'w') as f:
-            json.dump(data, f)
-        logger.log(f"Data is saved as {json_path}", "INFO")
+            cols = [col.text.strip() for col in row.find_all(['th', 'td'])]
+            data['Country/Territory'].append(cols[0])
+            data['GDP(US$MM)'].append(cols[1])                            
+        
+        logger.log(f"Extracting Finished !!", "INFO")
+        return data
 
     except Exception as e:
-        logger.log("Failed to extract data from Wikipedia", "ERROR")
+        logger.log("Extracting Failed", "ERROR")
         print(e)
-        success_flag = False
-
-    return success_flag
+        sys.exit(0)
 
 
-def transform_to_dataframe(
-    json_path: str | os.PathLike,
-    df_path: str | os.PathLike,
+def transform(
+    json_data: dict,
+    region_df_path: pd.DataFrame,
     logger: Logger,
-) -> bool:
+) -> pd.DataFrame:
     """Transform Data to pandas dataframe
     
     Args:
-        json_path (str | os.PathLike): JSON filepath
-        df_path (str | os.PathLike): DataFrame filepath
+        df (pd.DataFrame): JSON filepath
+        region_df_path (pd.DataFrame): Region DataFrame filepath
         logger (Logger): Logger
     Returns:
-        success_flag (bool): Success Flag
+        df (pd.DataFrame): DataFrame
     """
-    success_flag = True
-    logger.log("Transforming JSON to Pandas Dataframe", "INFO")
+    
+    logger.log("Transforming Start !!")
     try:
-        with open(json_path, 'r') as f:
-            data = json.load(f)
-
-        # Preprocessing
-        new_data = []
-        for country, values in data.items():
-            gdp, year, region = values[0], values[1], values[-1]
-            if gdp == '—':
-                continue
-            gdp = float(gdp.replace(',', ''))
-            gdp = round(gdp*0.001, 2) # million to billion
-            if len(year) > 4:
-                year = year[-4:]
-            new_data.append([country, gdp, year, region])
-
-        # Sort Valuesß
-        new_data = sorted(new_data, key=lambda x: -x[1])
-        df = pd.DataFrame(
-            new_data,
-            columns=[
-                "Country/Territory",
-                "GDP(US$MM)",
-                "Year",
-                "Region"
-            ],
-        )
-        df.to_csv(df_path, index=False)
-        logger.log(f"DataFrame is saved as {df_path}", "INFO")
+        df = pd.DataFrame(json_data)
+        region_df = pd.read_csv(region_df_path)
+        
+        df['GDP_USD_B'] = df['GDP(US$MM)'].apply(lambda x: x.replace(',', '') if x != '—' else '0')
+        df['GDP_USD_B'] = df['GDP_USD_B'].astype(float) / 1000
+        df['GDP_USD_B'] = df['GDP_USD_B'].round(2)
+        
+        df = pd.merge(df, region_df, on='Country/Territory', how='left')
+        df.rename(columns={'Country/Territory': 'Country'}, inplace=True)
+        logger.log("Transforming Finished !!")
+        
+        return df
 
     except Exception as e:
-        logger.log("Failed to transform data", "ERROR")
+        logger.log("Transforming Failed", "ERROR")
         print(e)
-        success_flag = False
-                                                
-    return success_flag   
+        sys.exit(0)
 
 
 def load(
+    df: pd.DataFrame,
     df_path: str | os.PathLike,
     logger: Logger,
-) -> bool:
+) -> None:
     """Load Dataframe and print results
     
     Args:
+        df (pd.DataFrame): DataFrame
         df_path (str | os.PathLike): DataFrame filepath
         logger (Logger): Logger
     Returns:
-        success_flag (bool): Success Flag
+        None
     """
     
-    logger.log("Loading data from Pandas Dataframe", "INFO")
-    success_flag = True
     try:
-        df = pd.read_csv(df_path)
+        logger.log("Loading start !!", "INFO")
+        df.to_json(df_path, orient='records')
+        logger.log("Loading Finished !!", "INFO")
     
-        # mission 1
-        upper_100b = df[df['GDP(US$MM)'] > 100]
-        print("Countries with GDP over 100 billion USD:")
-        print(upper_100b)
+    except Exception as e:
+        logger.log("Loading Failed", "ERROR")
+        print(e)
+        sys.exit(0)
         
-        # mission 2
-        group_df = df.groupby('Region', group_keys=False).apply(
-                lambda x: x.nlargest(5, 'GDP(US$MM)')['GDP(US$MM)'].mean(),
-                include_groups=False
-            )
-        print("\nAverage GDP of top 5 countries in each region:")
-        print(group_df)
-        logger.log("Finished loading data", "INFO")
-        logger.log('Done!!', 'INFO')
+
+def query_gdp_over_usd_100b(
+    json_path: str | os.PathLike,
+    logger: Logger,    
+) -> None:
+    """Query GDP over USD 100B"""
+    logger.log("Querying GDP over USD 100B", "INFO")
+    try:
+        df = pd.read_json(json_path)
+        conn = sqlite3.connect(':memory:')
+        
+        df.to_sql('gdp_data', conn, index=False, if_exists='replace')
+        query = """
+        SELECT
+            Country,
+            GDP_USD_B
+        FROM 
+            gdp_data
+        WHERE 
+            GDP_USD_B > 100
+        ORDER BY
+            GDP_USD_B DESC;
+        """
+        
+        res_df = pd.read_sql_query(query, conn)
+        print(res_df)
+        conn.close()
+        logger.log("Querying Finished !!", "INFO")
         
     except Exception as e:
-        logger.log("Failed to load data", "ERROR")
+        logger.log("Querying Failed", "ERROR")
         print(e)
-        success_flag = False
+        
+
+def query_top5_mean_per_region(
+    json_path: str | os.PathLike,
+    logger: Logger,    
+) -> None:
+    """Query top5 mean value of GDP per region"""
+    logger.log("Querying top5 mean value of GDP per region", "INFO")
     
-    return success_flag
-    
+    try:
+        df = pd.read_json(json_path)
+        conn = sqlite3.connect(':memory:')
+        
+        df.to_sql('gdp_data', conn, index=False, if_exists='replace')
+        query = """            
+        WITH Top5 AS (
+            SELECT 
+                Country, 
+                GDP_USD_B, 
+                Region,
+                ROW_NUMBER() OVER(PARTITION BY Region ORDER BY GDP_USD_B DESC) AS rnk
+            FROM gdp_data
+            WHERE GDP_USD_B IS NOT NULL
+        )
+        SELECT Region, AVG(GDP_USD_B) AS Top5_AVG_GDP 
+        FROM Top5
+        WHERE rnk <= 5
+        GROUP BY Region
+        ORDER BY Top5_AVG_GDP DESC;
+        """
+        
+        res_df = pd.read_sql_query(query, conn)
+        print(res_df)
+        conn.close()
+        logger.log("Querying Finished !!", "INFO")
+        
+    except Exception as e:
+        logger.log("Querying Failed", "ERROR")
+        print(e)
+        
 
 if __name__ == '__main__':
     LOGGER_PATH = "etl_project_log.txt"
-    RAW_TXT_PATH = "region.txt"
-    REGION_DF_PATH = "region.csv"
     WIKI_URL = "https://en.wikipedia.org/wiki/List_of_countries_by_GDP_%28nominal%29"
+    REGION_DF_PATH = "region.csv"
     JSON_PATH = "Countries_by_GDP.json"
-    DF_PATH = "Countries_by_GDP.csv"
 
     logger = Logger(LOGGER_PATH)
     logger.log("ETL Process is Started", "INFO")
-    
-    make_region_df(RAW_TXT_PATH, REGION_DF_PATH)
-    ext_flag = extract(WIKI_URL, REGION_DF_PATH, JSON_PATH, logger)
-    if not ext_flag:
-        sys.exit(0)
 
-    trf_flag = transform_to_dataframe(JSON_PATH, DF_PATH, logger)
-    if not trf_flag:
-        sys.exit(0)
-
-    load_flag = load(DF_PATH, logger)
-    if not load_flag:
-        sys.exit(0)
+    extract_data = extract(WIKI_URL, logger)
+    transform_data = transform(extract_data, REGION_DF_PATH, logger)
+    load(transform_data, JSON_PATH, logger)
+    query_gdp_over_usd_100b(JSON_PATH, logger)
+    query_top5_mean_per_region(JSON_PATH, logger)
         
     logger.log("ETL Process is Finished", "INFO")
