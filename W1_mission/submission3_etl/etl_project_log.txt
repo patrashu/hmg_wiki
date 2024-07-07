@@ -192,3 +192,60 @@
 2024-July-05 16:27:29 - (INFO) - Querying top5 mean value of GDP per region
 2024-July-05 16:27:29 - (INFO) - Querying Finished !!
 2024-July-05 16:27:29 - (INFO) - ETL Process is Finished
+2024-July-07 14:56:13 - (INFO) - ETL Process is Started
+2024-July-07 14:56:13 - (INFO) - Extracting Start !!
+2024-July-07 14:56:14 - (INFO) - Extracting Finished !!
+2024-July-07 14:56:14 - (INFO) - Transforming Start !!
+2024-July-07 14:56:14 - (ERROR) - Transforming Failed
+2024-July-07 14:56:35 - (INFO) - ETL Process is Started
+2024-July-07 14:56:35 - (INFO) - Extracting Start !!
+2024-July-07 14:56:36 - (INFO) - Extracting Finished !!
+2024-July-07 14:56:36 - (INFO) - Transforming Start !!
+2024-July-07 14:56:36 - (ERROR) - Transforming Failed
+2024-July-07 14:56:57 - (INFO) - ETL Process is Started
+2024-July-07 14:56:57 - (INFO) - Extracting Start !!
+2024-July-07 14:56:58 - (INFO) - Extracting Finished !!
+2024-July-07 14:56:58 - (INFO) - Transforming Start !!
+2024-July-07 14:56:58 - (INFO) - Transforming Finished !!
+2024-July-07 14:56:58 - (INFO) - Loading start !!
+2024-July-07 14:56:58 - (INFO) - Loading Finished !!
+2024-July-07 14:56:58 - (INFO) - Query GDP over USD 100B
+2024-July-07 14:56:58 - (INFO) - Querying Finished !!
+2024-July-07 14:56:58 - (INFO) - Querying top5 mean value of GDP per region
+2024-July-07 14:56:58 - (INFO) - Querying Finished !!
+2024-July-07 14:56:58 - (INFO) - ETL Process is Finished
+2024-July-07 14:58:29 - (INFO) - ETL Process is Started
+2024-July-07 14:58:29 - (INFO) - Extracting Start !!
+2024-July-07 14:58:29 - (INFO) - Extracting Finished !!
+2024-July-07 14:58:29 - (INFO) - Transforming Start !!
+2024-July-07 14:58:29 - (INFO) - Transforming Finished !!
+2024-July-07 14:58:29 - (INFO) - Loading start !!
+2024-July-07 14:58:29 - (INFO) - Loading Finished !!
+2024-July-07 14:58:29 - (INFO) - Query GDP over USD 100B
+2024-July-07 14:58:29 - (INFO) - Querying Finished !!
+2024-July-07 14:58:29 - (INFO) - Querying top5 mean value of GDP per region
+2024-July-07 14:58:29 - (INFO) - Querying Finished !!
+2024-July-07 14:58:29 - (INFO) - ETL Process is Finished
+2024-July-07 14:58:33 - INFO - ETL Process is Started
+2024-July-07 14:58:33 - INFO - Extracting Start !!
+2024-July-07 14:58:34 - INFO - Extracting Finished !!
+2024-July-07 14:58:34 - INFO - Transforming Start !!
+2024-July-07 14:58:34 - INFO - Transforming Finished !!
+2024-July-07 14:58:34 - INFO - Loading Start !!
+2024-July-07 14:58:34 - INFO - Logging Finished !!
+2024-July-07 14:58:34 - INFO - Query GDP over USD 100B
+2024-July-07 14:58:34 - INFO - Querying Finished !!
+2024-July-07 14:58:34 - INFO - Querying top5 mean value of GDP per region
+2024-July-07 14:58:34 - INFO - Querying Finished !!
+2024-July-07 14:58:34 - INFO - ETL Process is Finished
+2024-July-07 14:58:41 - INFO - ETL Process Started
+2024-July-07 14:58:41 - INFO - Extracting starte !!
+2024-July-07 14:59:07 - INFO - Transforming Start !!
+2024-July-07 14:59:07 - INFO - Transforming Finished !!
+2024-July-07 14:59:07 - INFO - Loading Start !!
+2024-July-07 14:59:07 - INFO - Logging Finished !!
+2024-July-07 14:59:07 - INFO - Query GDP over USD 100B
+2024-July-07 14:59:07 - INFO - Querying Finished !!
+2024-July-07 14:59:07 - INFO - Querying top5 mean value of GDP per region
+2024-July-07 14:59:07 - INFO - Querying Finished !!
+2024-July-07 14:59:07 - INFO - ETL Process is Finished

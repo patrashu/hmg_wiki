@@ -12,13 +12,14 @@ LOGGER_PATH = "etl_project_log.txt"
 WIKI_URL = "https://en.wikipedia.org/wiki/List_of_countries_by_GDP_%28nominal%29"
 REGION_DF_PATH = "region.csv"
 JSON_PATH = "Countries_by_GDP.json"
-    
+
 
 class Logger:
     """Logger Class"""
+
     def __init__(self, log_file: str | os.PathLike) -> None:
         """__init__ Constructor
-        
+
         Args:
             log_file (str | os.PathLike): _description_
         Returns:
@@ -27,12 +28,12 @@ class Logger:
         self.log_file = log_file
 
     def log(
-        self, 
-        msg: str, 
+        self,
+        msg: str,
         level: str = "INFO"
     ) -> None:
         """Logging Function
-        
+
         Args:
             msg (str): _description_
             level (str, optional): _description_. Defaults to "INFO".
@@ -44,14 +45,14 @@ class Logger:
             line = f"{timestamp} - ({level}) - {msg}\n"
             f.write(line)
             print(line)
-    
+
 
 def extract(
     url: str,
     logger: Logger
 ) -> dict:
     """Extract Table Data from Wikipedia
-    
+
     Args:
         url (str): Wikipedia URL
         logger (Logger): Logger
@@ -64,11 +65,11 @@ def extract(
         soup = bs(html.content, 'html.parser')
         table = soup.find('table', {'class': 'wikitable'})
         data = {
-            'Country/Territory': [],
+            'Country': [],
             'GDP(US$MM)': [],
         }
-        
-        # Country/Territory: [other data]
+
+        # Country: [other data]
         for i, row in enumerate(table.find_all('tr')):
             # Remove Title
             if i < 3:
@@ -76,9 +77,9 @@ def extract(
 
             # Extract each column
             cols = [col.text.strip() for col in row.find_all(['th', 'td'])]
-            data['Country/Territory'].append(cols[0])
-            data['GDP(US$MM)'].append(cols[1])                            
-        
+            data['Country'].append(cols[0])
+            data['GDP(US$MM)'].append(cols[1])
+
         logger.log(f"Extracting Finished !!", "INFO")
         return data
 
@@ -94,7 +95,7 @@ def transform(
     logger: Logger,
 ) -> pd.DataFrame:
     """Transform Data
-    
+
     Args:
         json_data (dict): JSON filepath
         region_df_path (pd.DataFrame): Region DataFrame filepath
@@ -102,20 +103,20 @@ def transform(
     Returns:
         df (pd.DataFrame): DataFrame
     """
-    
+
     logger.log("Transforming Start !!")
     try:
         df = pd.DataFrame(json_data)
         region_df = pd.read_csv(region_df_path)
-        
-        df['GDP_USD_B'] = df['GDP(US$MM)'].apply(lambda x: x.replace(',', '') if x != '—' else '0')
+
+        df['GDP_USD_B'] = df['GDP(US$MM)'].apply(
+            lambda x: x.replace(',', '') if x != '—' else '0')
         df['GDP_USD_B'] = df['GDP_USD_B'].astype(float) / 1000
         df['GDP_USD_B'] = df['GDP_USD_B'].round(2)
-        
-        df = pd.merge(df, region_df, on='Country/Territory', how='left')
-        df.rename(columns={'Country/Territory': 'Country'}, inplace=True)
+
+        df = pd.merge(df, region_df, on='Country', how='left')
         logger.log("Transforming Finished !!")
-        
+
         return df
 
     except Exception as e:
@@ -130,7 +131,7 @@ def load(
     logger: Logger,
 ) -> None:
     """Save Transformed Data to JSON
-    
+
     Args:
         df (pd.DataFrame): DataFrame
         json_path (str | os.PathLike): DataFrame filepath
@@ -138,28 +139,28 @@ def load(
     Returns:
         None
     """
-    
+
     try:
         logger.log("Loading start !!", "INFO")
         df.to_json(json_path, orient='records')
         logger.log("Loading Finished !!", "INFO")
-    
+
     except Exception as e:
         logger.log("Loading Failed", "ERROR")
         print(e)
         sys.exit(0)
-        
+
 
 def query_gdp_over_usd_100b(
     json_path: str | os.PathLike,
-    logger: Logger,    
+    logger: Logger,
 ) -> None:
     """Query GDP over USD 100B"""
     logger.log("Query GDP over USD 100B", "INFO")
     try:
         df = pd.read_json(json_path)
         conn = sqlite3.connect(':memory:')
-        
+
         df.to_sql('gdp_data', conn, index=False, if_exists='replace')
         query = """
         SELECT
@@ -172,28 +173,28 @@ def query_gdp_over_usd_100b(
         ORDER BY
             GDP_USD_B DESC;
         """
-        
+
         res_df = pd.read_sql_query(query, conn)
         print(res_df)
         conn.close()
         logger.log("Querying Finished !!", "INFO")
-        
+
     except Exception as e:
         logger.log("Querying Failed", "ERROR")
         print(e)
-        
+
 
 def query_top5_mean_per_region(
     json_path: str | os.PathLike,
-    logger: Logger,    
+    logger: Logger,
 ) -> None:
     """Query top5 mean value of GDP per region"""
     logger.log("Querying top5 mean value of GDP per region", "INFO")
-    
+
     try:
         df = pd.read_json(json_path)
         conn = sqlite3.connect(':memory:')
-        
+
         df.to_sql('gdp_data', conn, index=False, if_exists='replace')
         query = """            
         WITH Top5 AS (
@@ -211,16 +212,16 @@ def query_top5_mean_per_region(
         GROUP BY Region
         ORDER BY Top5_AVG_GDP DESC;
         """
-        
+
         res_df = pd.read_sql_query(query, conn)
         print(res_df)
         conn.close()
         logger.log("Querying Finished !!", "INFO")
-        
+
     except Exception as e:
         logger.log("Querying Failed", "ERROR")
         print(e)
-        
+
 
 if __name__ == '__main__':
     logger = Logger(LOGGER_PATH)
@@ -231,5 +232,5 @@ if __name__ == '__main__':
     load(transform_data, JSON_PATH, logger)
     query_gdp_over_usd_100b(JSON_PATH, logger)
     query_top5_mean_per_region(JSON_PATH, logger)
-        
+
     logger.log("ETL Process is Finished", "INFO")
