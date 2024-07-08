@@ -63,12 +63,9 @@ def extract_region_data() -> None:
 
             for idx in range(1, 5):
                 f_paragraph = paragraphs[idx].text.split('. ')
-                if country == 'Montenegro':
-                    print(f_paragraph)
-                    
                 if len(f_paragraph) < 2:
                     continue
-                
+
                 # 본문일 때
                 flag = False
                 for paragraph in f_paragraph:
@@ -94,6 +91,10 @@ def extract_region_data() -> None:
     df.to_csv(region_df_path, index=False)
 
 
+# Processing time: 153 seconds
 if __name__ == '__main__':
     # auto extract to dataframe
+    s_time = time.time()
     extract_region_data()
+    e_time = time.time()
+    print(f"Done! {e_time - s_time:.2f} sec")
