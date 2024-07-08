@@ -1,4 +1,4 @@
-from multiprocessing import Queue
+from multiprocessing import Queue, Process
 
 
 """
@@ -7,18 +7,30 @@ Get() function is used to pop an item from the queue.
 """
 
 
-if __name__ == '__main__':
+def put_items(queue: Queue):
     items = ['red', 'green', 'blue', 'black']
-    queue = Queue()
-    counter = 1
-    print("pushing items to queue:")
+    for idx, item in enumerate(items):
+        print(f"item no: {idx+1} {item}")
+        queue.put([idx, item])
 
-    for item in items:
-        print(f"item no: {counter} {item}")
-        queue.put([counter, item])
-        counter += 1
 
-    print("popping items from queue:")
+def get_items(queue: Queue):
     while not queue.empty():
         num, item = queue.get()
         print(f"item no: {num} {item}")
+
+
+if __name__ == '__main__':
+    queue = Queue()
+    
+    put_process = Process(target=put_items, args=(queue,))
+    get_process = Process(target=get_items, args=(queue,))
+    
+    print("Pushing items to queue")
+    put_process.start()
+    put_process.join()
+    
+    print("Popping items from queue")
+    get_process.start()
+    get_process.join()
+    
