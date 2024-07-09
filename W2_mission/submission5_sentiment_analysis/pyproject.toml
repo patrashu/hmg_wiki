@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "submission5-sentiment-analysis"
+version = "0.1.0"
+description = ""
+authors = ["patrashu <qhdrmfdl123@naver.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "^2.2.2"
+numpy = "^2.0.0"
+matplotlib = "^3.9.1"
+wordcloud = "^1.9.3"
+nltk = "^3.8.1"
+selenium = "^4.22.0"
+konlpy = "^0.6.0"
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
