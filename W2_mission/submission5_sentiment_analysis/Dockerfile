@@ -42,4 +42,4 @@ RUN cp /usr/share/fonts/truetype/nanum/Nanum* /usr/local/lib/python3.10/site-pac
     && rm -rf /home/ubuntu/.cache/matplotlib/*
 
 # Run Streamlit when the container launches
-CMD ["streamlit", "run", "team_analysis_prototype.py"]
+CMD ["streamlit", "run", "team_analysis_prototype.py", "--server.port=8123", "--server.address=0.0.0.0"]

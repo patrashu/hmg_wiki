@@ -5,3 +5,4 @@ poetry.lock
 *.pyc
 __pycache__
 *.csv
+*.pkg
