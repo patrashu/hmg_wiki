@@ -2,7 +2,7 @@ FROM openjdk:8-jdk
 
 # 환경 변수 설정
 ENV HADOOP_VERSION 3.3.6
-ENV HADOOP_HOME /opt/hadoop
+ENV HADOOP_HOME=/opt/hadoop
 ENV PATH $PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
 ENV HDFS_NAMENODE_DIR /opt/hadoop/hdfs/namenode
 ENV HDFS_DATANODE_DIR /opt/hadoop/hdfs/datanode
@@ -76,4 +76,3 @@ EXPOSE 9866 9867 9871 10020 8020
 
 # HDFS 포맷 및 SSH 서비스 시작
 CMD service ssh start && /usr/local/bin/format-hdfs.sh
-# CMD service ssh start && su - hdfs -c "/usr/local/bin/format-hdfs.sh"
