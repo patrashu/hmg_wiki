@@ -1,0 +1,6 @@
+
+clean:
+	docker rmi submission1_single_node_cluster_hadoop-hadoop:latest
+	docker volume rm submission1_single_node_cluster_hadoop_hadoop_namenode
+	docker volume rm submission1_single_node_cluster_hadoop_hadoop_datanode	
+	docker buildx prune

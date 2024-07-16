@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 
 services:
   hadoop:
@@ -15,9 +15,13 @@ services:
       - "10020:10020"
       - "8020:8020"
     volumes:
-      - hadoop_namenode:/opt/hadoop/hdfs/namenode
-      - hadoop_datanode:/opt/hadoop/hdfs/datanode
+      - hdfs_namenode:/opt/hadoop/hdfs/namenode
+      - hdfs_datanode:/opt/hadoop/hdfs/datanode
+      - hadoop_logs:/opt/hadoop/logs
+      - hadoop_config:/opt/hadoop/etc/hadoop
 
 volumes:
-  hadoop_namenode:
-  hadoop_datanode:
+  hdfs_namenode:
+  hdfs_datanode:
+  hadoop_logs:
+  hadoop_config:

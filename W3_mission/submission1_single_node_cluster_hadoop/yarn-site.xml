@@ -14,7 +14,7 @@
     <!-- <Resource Manager Web URI> -->
     <property>
         <name>yarn.resourcemanager.webapp.address</name>
-        <value>localhost:8088</value>
+        <value>0.0.0.0:8088</value>
     </property>
 
     <!-- <Node Manager address> -->
@@ -26,7 +26,7 @@
     <!-- <Node Manager Web URI> -->
     <property>
         <name>yarn.nodemanager.webapp.address</name>
-        <value>localhost:8042</value>
+        <value>0.0.0.0:8042</value>
     </property>
 
     <!-- <Enable Log Aggregation> -->
