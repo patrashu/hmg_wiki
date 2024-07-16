@@ -34,7 +34,7 @@ COPY hdfs-site.xml $HADOOP_HOME/etc/hadoop/
 COPY mapred-site.xml $HADOOP_HOME/etc/hadoop/
 COPY yarn-site.xml $HADOOP_HOME/etc/hadoop/
 
-# Make HDFS directories and set permissions (hdfs 사용자로 실행)
+# ssh 설정
 USER hdfs
 RUN mkdir -p $HADOOP_HOME/hdfs/namenode && \
     mkdir -p $HADOOP_HOME/hdfs/datanode && \
@@ -42,7 +42,6 @@ RUN mkdir -p $HADOOP_HOME/hdfs/namenode && \
     chmod -R 777 $HADOOP_HOME/hdfs && \
     chmod -R 777 $HADOOP_HOME/logs
 
-# ssh 설정 (hdfs 사용자로 실행)
 RUN mkdir -p /home/hdfs/.ssh && \
     ssh-keygen -t rsa -N '' -f /home/hdfs/.ssh/id_rsa && \
     cat /home/hdfs/.ssh/id_rsa.pub >> /home/hdfs/.ssh/authorized_keys && \
@@ -56,16 +55,25 @@ RUN mkdir -p /home/yarn/.ssh && \
     chmod 0600 /home/yarn/.ssh/authorized_keys && \
     chmod 700 /home/yarn/.ssh
 
-# Add hdfs user's public key to root's authorized_keys for passwordless SSH
 USER root
+RUN mkdir -p /home/root/.ssh && \
+    ssh-keygen -t rsa -N '' -f /home/root/.ssh/id_rsa && \
+    cat /home/root/.ssh/id_rsa.pub >> /home/root/.ssh/authorized_keys && \
+    chmod 0600 /home/root/.ssh/authorized_keys && \
+    chmod 700 /home/root/.ssh && \
+    ssh-keygen -A && \
+    echo "hdfs ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
+    echo "yarn ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# HDFS 포맷 스크립트 & JAVA_HOME 설정
 COPY format-hdfs.sh /usr/local/bin/format-hdfs.sh
 RUN chmod +x /usr/local/bin/format-hdfs.sh
-
 RUN echo "export JAVA_HOME="$(jrunscript -e 'java.lang.System.out.println(java.lang.System.getProperty("java.home"));')"" >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh
 
-# Expose ports
+# Port 설정
 EXPOSE 9864 9870 8042 8088 22
 EXPOSE 9866 9867 9871 10020 8020
 
-# Restart ssh and run the Hadoop services
-CMD service ssh start && su - hdfs -c "/usr/local/bin/format-hdfs.sh"
+# HDFS 포맷 및 SSH 서비스 시작
+CMD service ssh start && /usr/local/bin/format-hdfs.sh
+# CMD service ssh start && su - hdfs -c "/usr/local/bin/format-hdfs.sh"

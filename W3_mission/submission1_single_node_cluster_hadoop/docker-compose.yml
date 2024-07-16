@@ -15,13 +15,13 @@ services:
       - "10020:10020"
       - "8020:8020"
     volumes:
-      - hdfs_namenode:/opt/hadoop/hdfs/namenode
-      - hdfs_datanode:/opt/hadoop/hdfs/datanode
+      - namenode:/opt/hadoop/hdfs/namenode
+      - datanode:/opt/hadoop/hdfs/datanode
       - hadoop_logs:/opt/hadoop/logs
       - hadoop_config:/opt/hadoop/etc/hadoop
 
 volumes:
-  hdfs_namenode:
-  hdfs_datanode:
+  namenode:
+  datanode:
   hadoop_logs:
   hadoop_config:
