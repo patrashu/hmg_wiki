@@ -52,17 +52,17 @@
     - 처음에는 Slave Node 2, replication 2로 설정했기에, local에서 file을 올려도 두 Slave node에 모두 저장되는 현상을 확인했습니다.
     - 이를 보다 정확하게 해결해보고자, Slave Node 3, replication 2로 설정하여 실험을 해본 결과, 의도했던 대로 Slave 1, 2, 3 중 2개의 Slave Node에만 저장되는 것을 확인했습니다.
         
-        ![스크린샷 2024-07-17 오후 5.42.35.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/d5fbc738-7e70-4fc4-8ccb-71d1fde36e4c/f73cbfe2-ae90-4f82-8905-302c66feb3b2/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-17_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_5.42.35.png)
+        ![스크린샷 2024-07-17 오후 5.42.35.png](https://github.com/user-attachments/assets/50baf87a-6db0-403c-ab5b-488989367834)
         
 - mapred-site.xml (mapreduce)
     - MapReduce 관련 config를 지정하는 파일이며, 해당 파일을 수정해가며 MapReduce 과정을 이해하기 위해 노력했습니다.
     - map의 job을 10으로 설정하여 MapReduce 작업을 수행할 경우, 10개의 부분 파일로 분할된 작업들이 master를 포함한 4개의 Node에서 분산하여 처리하는 결과를 확인했다.
         
-        ![스크린샷 2024-07-17 오후 4.19.34.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/d5fbc738-7e70-4fc4-8ccb-71d1fde36e4c/15ccde25-4b3a-48d5-997c-c67c1624e90e/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-17_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.19.34.png)
+        ![스크린샷 2024-07-17 오후 4.19.34.png](https://github.com/user-attachments/assets/0d91d956-25ea-4fb9-9156-615789d2d031)
         
     - reduce의 job을 2로 설정할 경우, MapReduce 작업이 종료된 후 두 개의 Part(tition) 파일이 생성되며, 각 파티션마다 다른 결과가 저장되는 것을 확인할 수 있다.
         
-        ![스크린샷 2024-07-17 오후 5.39.38.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/d5fbc738-7e70-4fc4-8ccb-71d1fde36e4c/f7048d8c-10b1-4104-b461-a54fc3dce3bd/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-17_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_5.39.38.png)
+        ![스크린샷 2024-07-17 오후 5.39.38.png](https://github.com/user-attachments/assets/aa1c31d1-a0d7-40b5-80c0-9ed97f4173fa)
         
 
 ### Hadoop 상호작용 / MapReduce 실습
