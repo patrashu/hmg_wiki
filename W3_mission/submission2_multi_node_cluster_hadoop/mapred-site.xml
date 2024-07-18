@@ -31,4 +31,12 @@
         <name>mapreduce.job.reduces</name>
         <value>2</value> 
     </property>
+    <property>
+        <name>mapreduce.jobhistory.address</name>
+        <value>hadoop-master:10020</value>
+    </property>
+    <property>
+        <name>mapreduce.task.io.sort.mb</name>
+        <value>100</value>
+    </property>
 </configuration>

@@ -3,6 +3,7 @@ FROM openjdk:8-jdk
 # HADOOP 환경 변수 추가
 ENV HADOOP_VERSION 3.3.6
 ENV HADOOP_HOME=/opt/hadoop
+ENV HADOOP_TMP_DIR=/tmp/hadoop
 ENV PATH $PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
 ENV HDFS_NAMENODE_USER=root
 ENV HDFS_DATANODE_USER=root
@@ -10,9 +11,14 @@ ENV HDFS_SECONDARYNAMENODE_USER=root
 ENV YARN_RESOURCEMANAGER_USER=root
 ENV YARN_NODEMANAGER_USER=root
 
+WORKDIR /root
+COPY modify_config.py /root/modify_config.py
+COPY verify_config.sh /root/verify_config.sh
+COPY rollback_config.sh /root/rollback_config.sh
+
 # 의존성 파일 설치
 RUN apt-get update -y && \
-    apt-get install -y wget sudo curl ssh openssh-server sshpass && \
+    apt-get install -y wget sudo curl ssh openssh-server vim && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -23,18 +29,20 @@ RUN curl -o /tmp/hadoop-$HADOOP_VERSION.tar.gz https://downloads.apache.org/hado
     rm /tmp/hadoop-$HADOOP_VERSION.tar.gz
 
 # Config 파일 복사
-COPY core-site.xml $HADOOP_HOME/etc/hadoop/
-COPY hdfs-site.xml $HADOOP_HOME/etc/hadoop/
-COPY mapred-site.xml $HADOOP_HOME/etc/hadoop/
-COPY yarn-site.xml $HADOOP_HOME/etc/hadoop/
-COPY workers $HADOOP_HOME/etc/hadoop/
+COPY core-site.xml $HADOOP_HOME/etc/hadoop
+COPY hdfs-site.xml $HADOOP_HOME/etc/hadoop
+COPY mapred-site.xml $HADOOP_HOME/etc/hadoop
+COPY yarn-site.xml $HADOOP_HOME/etc/hadoop
+COPY workers $HADOOP_HOME/etc/hadoop
 
 # HADOOP 디렉토리 생성
-RUN mkdir -p $HADOOP_HOME/hdfs/namenode && \
+RUN mkdir -p $HADOOP_TMP_DIR && \
+    mkdir -p $HADOOP_HOME/hdfs/namenode && \
     mkdir -p $HADOOP_HOME/hdfs/datanode && \
     mkdir -p $HADOOP_HOME/logs && \
     chmod -R 777 $HADOOP_HOME/hdfs && \
-    chmod -R 777 $HADOOP_HOME/logs
+    chmod -R 777 $HADOOP_HOME/logs && \
+    chmod -R 777 $HADOOP_TMP_DIR
 
 # SSH 설정
 RUN ssh-keygen -t rsa -f ~/.ssh/id_rsa -P '' && \
