@@ -28,14 +28,16 @@
 
 - `hdfs dfs -put ratings.csv /movie_rate`를 통해 파일을 업로드합니다.
     
-    ![스크린샷 2024-07-19 오후 5.31.01.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/d5fbc738-7e70-4fc4-8ccb-71d1fde36e4c/4b0f9250-7789-4f57-b6d5-154ad10ea058/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-19_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_5.31.01.png)
+    ![스크린샷 2024-07-19 오후 5.31.01.png](https://github.com/user-attachments/assets/2c44dc55-d7f3-41aa-b4ab-2fe56d8e756c)
     
 - `calculate_movie_rate.sh`를 통해 MapReduce 작업을 수행합니다.
     
-    ![스크린샷 2024-07-19 오후 5.36.39.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/d5fbc738-7e70-4fc4-8ccb-71d1fde36e4c/ae345893-5dae-45f3-8b79-ce3f4b93121c/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-19_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_5.36.39.png)
+    ![스크린샷 2024-07-19 오후 5.36.39.png](https://github.com/user-attachments/assets/f1bcf302-2e48-4c1b-bbb9-534cba935f3c)
     
 - `hdfs dfs -ls /movie_rate_output`을 통해 2개의 partition 결과를 확인했습니다.
     
-    ![스크린샷 2024-07-19 오후 5.38.14.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/d5fbc738-7e70-4fc4-8ccb-71d1fde36e4c/851ef575-4c98-49fb-8ddf-0fdb4ae80585/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-19_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_5.38.14.png)
+    ![스크린샷 2024-07-19 오후 5.38.14.png](https://github.com/user-attachments/assets/6a9c62e6-b750-4a81-9128-6b12e92e81c9)
     
 - `hdfs dfs -cat /movie_rate_output/part-00001`을 통해 결과를 확인합니다.
+
+    ![스크린샷 2024-07-19 오후 5.40.46.png](https://github.com/user-attachments/assets/b08d08a9-4e8c-4e37-a20d-c831dbe3726c)

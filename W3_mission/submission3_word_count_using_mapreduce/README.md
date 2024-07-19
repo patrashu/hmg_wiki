@@ -31,19 +31,20 @@
 
 - `hdfs dfs -put ebook.txt /ebook`을 통해 파일을 업로드합니다.
     
-    ![스크린샷 2024-07-19 오후 4.41.21.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/d5fbc738-7e70-4fc4-8ccb-71d1fde36e4c/5e431455-0844-47a6-b2fb-297d63d19b4b/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-19_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.41.21.png)
+    ![스크린샷 2024-07-19 오후 4.41.21.png](https://github.com/user-attachments/assets/a646ab61-0ac8-42a7-9e43-3e417b2e10a8)
     
 - `ebook_wordcount.sh` 파일을 실행시켜 MapReduce 작업을 수행했습니다.
     
-    ![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/d5fbc738-7e70-4fc4-8ccb-71d1fde36e4c/0c4d5587-1bab-432f-8c54-835233c49cd3/Untitled.png)
+    ![Untitled](https://github.com/user-attachments/assets/29087856-3bd5-4b33-b017-bd5333b40a10)
     
 - `hdfs dfs -ls /ebook_wordcount`를 활용하여 정상적으로 파일이 생성되었는지 확인했으며, Reduce.Job을 2로 설정했기에, 수행 결과 Partition이 두 개 생성됩니다.
     
-    ![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/d5fbc738-7e70-4fc4-8ccb-71d1fde36e4c/c472cde7-924a-4d54-abd5-a435fb8aafcb/Untitled.png)
+    ![Untitled](https://github.com/user-attachments/assets/9e807e76-5ecf-4459-bd01-e4280bb917f0)
     
 - `hdfs dfs -cat /ebook_wordcount/part-00001`를 통해결과 확인을 진행했습니다.
     
-    ![스크린샷 2024-07-19 오후 4.36.54.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/d5fbc738-7e70-4fc4-8ccb-71d1fde36e4c/2600f8b0-16f2-453c-aee7-3072882fbdb9/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-19_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.36.54.png)
+    ![스크린샷 2024-07-19 오후 4.36.54.png](https://github.com/user-attachments/assets/4f1d66c2-4ea9-4580-a9dc-b6055f75fb0a)
+
 
 ### Reference Link
 

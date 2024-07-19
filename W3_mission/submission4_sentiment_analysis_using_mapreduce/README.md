@@ -30,16 +30,16 @@
 
 - `hdfs dfs -put sentiment_analysis.csv /sentiment`를 통해 파일을 업로드 합니다.
     
-    ![스크린샷 2024-07-19 오후 4.56.56.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/d5fbc738-7e70-4fc4-8ccb-71d1fde36e4c/5acb08e9-0f25-4f1d-8270-8101d933f8cd/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-19_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.56.56.png)
+    ![스크린샷 2024-07-19 오후 4.56.56.png](https://github.com/user-attachments/assets/e2112f86-d9a8-40ec-b219-8131a362a9e7)
     
 - `sentiment_analysis.sh`를 통해 MapReduce 작업을 수행합니다.
     
-    ![스크린샷 2024-07-19 오후 4.58.47.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/d5fbc738-7e70-4fc4-8ccb-71d1fde36e4c/e0d7d4d2-4c2f-49e7-8c86-abe87e8ef7a4/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-19_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_4.58.47.png)
+    ![스크린샷 2024-07-19 오후 4.58.47.png](https://github.com/user-attachments/assets/a7e52757-22db-41a8-bd61-3bb13d57c342)
     
 - `hdfs dfs -ls /sentiment_wordcount`를 통해 2개의 파티션 파일이 생성되었습니다.
     
-    ![스크린샷 2024-07-19 오후 5.08.08.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/d5fbc738-7e70-4fc4-8ccb-71d1fde36e4c/f4f1ab6a-9897-4120-800a-b86774e7f2e5/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-19_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_5.08.08.png)
+    ![스크린샷 2024-07-19 오후 5.08.08.png](https://github.com/user-attachments/assets/0406adfa-c40f-4242-adda-dc5c97b49a71)
     
 - `hdfs dfs -cat /sentiment_wordcount/part-00000`을 통해 결과를 출력했습니다.
 
-    ![스크린샷 2024-07-19 오후 5.10.49.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/d5fbc738-7e70-4fc4-8ccb-71d1fde36e4c/c0b5ed37-b26c-45c3-b32a-c72b34eab3bc/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2024-07-19_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_5.10.49.png)
+    ![스크린샷 2024-07-19 오후 5.10.49.png](https://github.com/user-attachments/assets/9e2bcd2d-8657-4875-aa03-cc672ab9e34b)
