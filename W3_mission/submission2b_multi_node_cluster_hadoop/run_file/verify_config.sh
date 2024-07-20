@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set Hadoop environment variables
-export HADOOP_HOME=/opt/hadoop
+export HADOOP_HOME=/usr/local/hadoop
 export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
 
 # Function to get Hadoop configuration value
@@ -31,7 +31,7 @@ verify_setting() {
 
 # Verify specific Hadoop settings
 verify_setting "fs.defaultFS" "hdfs://namenode:9000"
-verify_setting "hadoop.tmp.dir" "/hadoop/tmp"
+verify_setting "hadoop.tmp.dir" "/usr/local/hadoop/tmp"
 verify_setting "io.file.buffer.size" "131072"
 verify_setting "dfs.replication" "2"
 verify_setting "dfs.blocksize" "134217728"
@@ -65,7 +65,7 @@ hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar w
 hdfs dfs -cat /tmp/wordcount_output/part-r-00000
 
 # Query YARN ResourceManager for total available memory
-total_memory=$(yarn node -list 2>/dev/null | grep 'Total Memory' | awk '{print $3}')
+total_memory=$(yarn node -list 2>/dev/null | grep -oP 'Total Memory: \K[0-9]+')
 if [[ "$total_memory" == "8192" ]]; then
     echo "PASS: Total YARN memory is 8192 MB"
 else

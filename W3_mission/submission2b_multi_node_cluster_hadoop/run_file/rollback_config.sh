@@ -1,6 +1,6 @@
 # rollback config
 
-HADOOP_CONF_DIR="/opt/hadoop/etc/hadoop"
+HADOOP_CONF_DIR="/usr/local/hadoop/etc/hadoop"
 
 rollback_config() {
     local filename=$1
@@ -21,11 +21,11 @@ for filename in $modify_configs_list; do
 done
 
 echo "Stopping Hadoop DFS..."
-/opt/hadoop/sbin/stop-dfs.sh
+/usr/local/hadoop/sbin/stop-dfs.sh
 echo "Stopping YARN..."
-/opt/hadoop/sbin/stop-yarn.sh
+/usr/local/hadoop/sbin/stop-yarn.sh
 
 echo "Starting Hadoop DFS..."
-/opt/hadoop/sbin/start-dfs.sh
+/usr/local/hadoop/sbin/start-dfs.sh
 echo "Starting YARN..."
-/opt/hadoop/sbin/start-yarn.sh
+/usr/local/hadoop/sbin/start-yarn.sh
