@@ -4,15 +4,15 @@
         <value>1</value>
     </property>
     <property>
-        <name>dfs.blocksize</name>
-        <value></value>
-    </property>
-    <property>
         <name>dfs.namenode.name.dir</name>
-        <value>file:///opt/hadoop/hdfs/namenode</value>
+        <value>file:///usr/local/hadoop/hdfs/namenode</value>
     </property>
     <property>
         <name>dfs.datanode.data.dir</name>
-        <value>file:///opt/hadoop/hdfs/datanode</value>
+        <value>file:///usr/local/hadoop/hdfs/datanode</value>
+    </property>
+    <property>
+        <name>dfs.permissions.enabled</name>
+        <value>false</value>
     </property>
 </configuration>
