@@ -39,10 +39,5 @@ RUN echo "export JAVA_HOME=$(jrunscript -e 'java.lang.System.out.println(java.la
 RUN echo "alias pyspark='$SPARK_HOME/bin/pyspark'" >> ~/.bashrc && \
     echo "alias spark-shell='$SPARK_HOME/bin/spark-shell'" >> ~/.bashrc
 
-# # add key
-# RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
-#     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
-#     chmod 0600 ~/.ssh/authorized_keys
-
 # Entry point
 CMD ["bash"]
