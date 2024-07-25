@@ -4,11 +4,11 @@ FROM spark_base
 COPY master_entrypoint.sh $SPARK_HOME/master_entrypoint.sh
 RUN chmod +x $SPARK_HOME/master_entrypoint.sh
 
-RUN mkdir -p $SPARK_HOME/examples/test
-COPY montecarlo.py $SPARK_HOME/examples/test/montecarlo.py
-COPY spark_submit_example.sh $SPARK_HOME/examples/test/spark_submit_example.sh
+RUN mkdir -p $SPARK_HOME/examples/mission2
+COPY shell_files/* $SPARK_HOME/examples/mission2
+COPY mission2.ipynb $SPARK_HOME/examples/mission2
 
 # Set environment variables
-EXPOSE 8080 7077
+EXPOSE 8080 7077 8888
 
 CMD $SPARK_HOME/master_entrypoint.sh

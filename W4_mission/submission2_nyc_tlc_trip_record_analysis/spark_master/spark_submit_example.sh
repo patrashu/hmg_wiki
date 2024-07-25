@@ -1,1 +1,0 @@
-spark-submit --master spark://spark-master:7077 $SPARK_HOME/examples/test/montecarlo.py > $SPARK_HOME/examples/test/montecarlo_result.csv

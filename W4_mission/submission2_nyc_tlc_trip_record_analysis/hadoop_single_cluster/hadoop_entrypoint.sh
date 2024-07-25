@@ -18,5 +18,8 @@ $HADOOP_HOME/sbin/start-dfs.sh
 echo "start YARN"
 $HADOOP_HOME/sbin/start-yarn.sh
 
+$HADOOP_HOME/bin/hdfs dfs -mkdir -p /data
+$HADOOP_HOME/bin/hdfs dfs -mkdir -p /spark-logs
+
 # 컨테이너 실행을 유지하기 위해 로그 파일 출력
 tail -f /dev/null

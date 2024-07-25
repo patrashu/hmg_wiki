@@ -9,6 +9,7 @@ services:
     ports:
       - "8080:8080" # Spark Master
       - "7077:7077" # Spark Master
+      - "8888:8888" # Jupyter Notebook
     volumes:
       - spark-master:/opt/spark
       - spark-logs:/opt/spark/logs

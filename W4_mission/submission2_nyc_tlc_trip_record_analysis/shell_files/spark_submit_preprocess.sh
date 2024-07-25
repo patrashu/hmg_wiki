@@ -1,1 +1,0 @@
-spark-submit --master spark://spark-master:7077 $SPARK_HOME/examples/mission2/python_files/preprocess_data.py > $SPARK_HOME/examples/mission2/logs/preprocess_df.csv
