@@ -15,7 +15,7 @@ ENV YARN_CONF_DIR=$SPARK_HOME/conf
 # Install dependencies and Python, Java
 RUN apt-get update && \
     apt-get install -y openjdk-11-jdk curl vim ssh python3-pip openssh-server openssh-client && \
-    pip3 install pandas pyarrow pyspark matplotlib && \
+    pip3 install pandas pyarrow pyspark matplotlib jupyter && \
     pip3 install numpy==1.24.0 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
