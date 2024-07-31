@@ -1,0 +1,103 @@
+version: "3.8"
+services:
+  spark-master:
+    build:
+      context: spark_master
+      dockerfile: Dockerfile
+    container_name: spark-master
+    hostname: spark-master
+    ports:
+      - "8080:8080" # Spark Master
+      - "7077:7077" # Spark Master
+      - "8888:8888" # Jupyter Notebook
+      - "8088:8088" # Hadoop ResourceManager
+      - "9870:9870" # Hadoop NameNode
+      - "9000:9000" # HDFS
+    volumes:
+      - spark-master:/root
+      - hadoop-data:/opt/hadoop/dfs/name
+      - spark-logs:/opt/spark/logs
+    networks:
+      - spark-network
+
+  spark-worker1:
+    build:
+      context: spark_worker
+      dockerfile: Dockerfile
+    container_name: spark-worker1
+    hostname: spark-worker1
+    ports:
+      - "8081:8081" # Spark Worker
+      - "9861:9864" # Hadoop DataNode
+    volumes:
+      - spark-worker1:/root
+      - hadoop-data:/opt/hadoop/dfs/data
+      - spark-logs:/opt/spark/logs
+    networks:
+      - spark-network
+    depends_on:
+      - spark-master
+    
+  spark-worker2:
+    build:
+      context: spark_worker
+      dockerfile: Dockerfile
+    container_name: spark-worker2
+    hostname: spark-worker2
+    ports:
+      - "8082:8081" # Spark Worker
+      - "9862:9864" # Hadoop DataNode
+    volumes:
+      - spark-worker2:/root
+      - hadoop-data:/opt/hadoop/dfs/data
+      - spark-logs:/opt/spark/logs
+    networks:
+      - spark-network
+    depends_on:
+      - spark-master
+  
+  spark-worker3:
+    build:
+      context: spark_worker
+      dockerfile: Dockerfile
+    container_name: spark-worker3
+    hostname: spark-worker3
+    ports:
+      - "8083:8081" # Spark Worker
+      - "9863:9864" # Hadoop DataNode
+    volumes:
+      - spark-worker3:/root
+      - hadoop-data:/opt/hadoop/dfs/data
+      - spark-logs:/opt/spark/logs
+    networks:
+      - spark-network
+    depends_on:
+      - spark-master
+
+  spark-history:
+    build:
+      context: spark_history
+      dockerfile: Dockerfile
+    container_name: spark-history
+    hostname: spark-history
+    ports:
+      - "18080:18080" # Spark History Server
+    volumes:
+      - spark-logs:/opt/spark/logs
+      - hadoop-data:/opt/hadoop/dfs/data
+    networks:
+      - spark-network
+    depends_on:
+      - spark-master
+
+networks:
+  spark-network:
+    driver: bridge
+
+volumes:
+  spark-master:
+  spark-worker1:
+  spark-worker2:
+  spark-worker3:
+  spark-logs:
+  hadoop-data:

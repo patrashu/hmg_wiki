@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "submission2-nyc-tlc-trip-record-analysis"
+version = "0.1.0"
+description = ""
+authors = ["patrashu <qhdrmfdl123@naver.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pyarrow = "^17.0.0"
+pyspark = "^3.5.1"
+pandas = "^2.2.2"
+numpy = "^2.0.1"
+matplotlib = "^3.9.1"
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
