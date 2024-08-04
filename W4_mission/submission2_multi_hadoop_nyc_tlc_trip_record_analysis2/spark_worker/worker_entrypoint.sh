@@ -7,7 +7,7 @@ service ssh start
 export HADOOP_HOME=/opt/hadoop
 export PATH=$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$PATH
 
-echo "start datanode / resourcemanager"
+echo "start datanode / nodemanager"
 $HADOOP_HOME/bin/hdfs --daemon start datanode
 $HADOOP_HOME/bin/yarn --daemon start nodemanager
 

@@ -15,7 +15,7 @@ services:
       - "9000:9000" # HDFS
     volumes:
       - spark-master:/root
-      - hadoop-data:/opt/hadoop/dfs/name
+      - hadoop-namenode:/opt/hadoop/hdfs/namenode
       - spark-logs:/opt/spark/logs
     networks:
       - spark-network
@@ -31,7 +31,7 @@ services:
       - "9861:9864" # Hadoop DataNode
     volumes:
       - spark-worker1:/root
-      - hadoop-data:/opt/hadoop/dfs/data
+      - hadoop-datanode-worker1:/opt/hadoop/hdfs/datanode
       - spark-logs:/opt/spark/logs
     networks:
       - spark-network
@@ -49,7 +49,7 @@ services:
       - "9862:9864" # Hadoop DataNode
     volumes:
       - spark-worker2:/root
-      - hadoop-data:/opt/hadoop/dfs/data
+      - hadoop-datanode-worker2:/opt/hadoop/hdfs/datanode
       - spark-logs:/opt/spark/logs
     networks:
       - spark-network
@@ -67,7 +67,7 @@ services:
       - "9863:9864" # Hadoop DataNode
     volumes:
       - spark-worker3:/root
-      - hadoop-data:/opt/hadoop/dfs/data
+      - hadoop-datanode-worker3:/opt/hadoop/hdfs/datanode
       - spark-logs:/opt/spark/logs
     networks:
       - spark-network
@@ -84,7 +84,6 @@ services:
       - "18080:18080" # Spark History Server
     volumes:
       - spark-logs:/opt/spark/logs
-      - hadoop-data:/opt/hadoop/dfs/data
     networks:
       - spark-network
     depends_on:
@@ -100,4 +99,7 @@ volumes:
   spark-worker2:
   spark-worker3:
   spark-logs:
-  hadoop-data:
+  hadoop-datanode-worker1:
+  hadoop-datanode-worker2:
+  hadoop-datanode-worker3:
+  hadoop-namenode:
